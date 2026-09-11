@@ -12,10 +12,23 @@ function getServiceClient() {
   });
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function requireOwner(supabase: any, userId: string) {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", userId)
+    .single();
+  if (error || !data || data.role !== "OWNER") {
+    throw new Error("Apenas administradores podem gerenciar usuários.");
+  }
+}
+
 const modulosValidos = z.array(
   z.enum([
     "agendamentos",
     "servicos",
+    "pacientes",
     "financeiro",
     "usuarios",
     "configuracoes",
@@ -45,7 +58,9 @@ export const criarUsuario = createServerFn({ method: "POST" })
       modulos: modulosValidos.default([]),
     }).parse(d)
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await requireOwner(context.supabase, context.userId);
+
     const admin = getServiceClient();
 
     const { data: user, error } = await admin.auth.admin.createUser({
@@ -86,6 +101,8 @@ export const editarUsuario = createServerFn({ method: "POST" })
     }).parse(d)
   )
   .handler(async ({ data, context }) => {
+    await requireOwner(context.supabase, context.userId);
+
     const { error } = await context.supabase
       .from("profiles")
       .update({
@@ -104,6 +121,12 @@ export const toggleAtivoUsuario = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
+    await requireOwner(context.supabase, context.userId);
+
+    if (data.id === context.userId) {
+      throw new Error("Você não pode desativar sua própria conta.");
+    }
+
     const { data: profile, error: fetchError } = await context.supabase
       .from("profiles")
       .select("ativo")
@@ -127,7 +150,11 @@ export const alterarSenhaUsuario = createServerFn({ method: "POST" })
       nova_senha: z.string().min(6),
     }).parse(d)
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    if (data.id !== context.userId) {
+      await requireOwner(context.supabase, context.userId);
+    }
+
     const admin = getServiceClient();
     const { error } = await admin.auth.admin.updateUserById(data.id, {
       password: data.nova_senha,

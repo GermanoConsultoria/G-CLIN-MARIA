@@ -39,7 +39,7 @@ function AuthPage() {
       setLoading(false);
       return toast.error("A senha deve ter pelo menos 8 caracteres.");
     }
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { emailRedirectTo: `${window.location.origin}/dashboard` },
@@ -53,7 +53,12 @@ function AuthPage() {
         return toast.error("Este email já está cadastrado. Faça login.");
       return toast.error(error.message);
     }
-    toast.success("Conta criada! Verifique seu email para confirmar.");
+    if (data.session) {
+      toast.success("Conta criada com sucesso!");
+      nav({ to: "/dashboard" });
+    } else {
+      toast.success("Conta criada! Verifique seu email para confirmar.");
+    }
   };
 
   return (

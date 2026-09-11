@@ -8,33 +8,36 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { temAcesso, type Modulo } from "@/lib/auth";
 import gtechLogo from "@/assets/g-tech-logo.png";
 import logoMaria from "@/assets/logo_maria.png";
 
 export const Route = createFileRoute("/_app")({ component: AppLayout });
 
 const mainNavItems = [
-  { to: "/overview",  label: "Painel",          icon: Home },
-  { to: "/dashboard", label: "Agendamentos",    icon: Calendar },
-  { to: "/slots",     label: "Horários livres", icon: Search },
-  { to: "/hours",     label: "Funcionamento",   icon: Clock },
-  { to: "/services",  label: "Serviços",        icon: Briefcase },
-  { to: "/pacientes", label: "Pacientes",       icon: UserSquare2 },
+  { to: "/overview",  label: "Painel",          icon: Home,          modulo: null as Modulo | null },
+  { to: "/dashboard", label: "Agendamentos",    icon: Calendar,      modulo: "agendamentos" as Modulo | null },
+  { to: "/slots",     label: "Horários livres", icon: Search,        modulo: "agendamentos" as Modulo | null },
+  { to: "/hours",     label: "Funcionamento",   icon: Clock,         modulo: "agendamentos" as Modulo | null },
+  { to: "/services",  label: "Serviços",        icon: Briefcase,     modulo: "servicos" as Modulo | null },
+  { to: "/pacientes", label: "Pacientes",       icon: UserSquare2,   modulo: "pacientes" as Modulo | null },
 ] as const;
 
 const financeItems = [
-  { to: "/receivables",      label: "A receber",        icon: TrendingUp },
-  { to: "/payables",         label: "A pagar",          icon: TrendingDown },
-  { to: "/pending-payments", label: "Pend. Pagamentos", icon: AlertCircle },
-  { to: "/balance",          label: "Balancete",        icon: Scale },
-  { to: "/chart-accounts",   label: "Plano de contas",  icon: BookOpen },
+  { to: "/receivables",      label: "A receber",        icon: TrendingUp,   modulo: "financeiro" as Modulo | null },
+  { to: "/payables",         label: "A pagar",          icon: TrendingDown, modulo: "financeiro" as Modulo | null },
+  { to: "/pending-payments", label: "Pend. Pagamentos", icon: AlertCircle,  modulo: "financeiro" as Modulo | null },
+  { to: "/balance",          label: "Balancete",        icon: Scale,        modulo: "financeiro" as Modulo | null },
+  { to: "/chart-accounts",   label: "Plano de contas",  icon: BookOpen,     modulo: "financeiro" as Modulo | null },
 ] as const;
 
 const configItems = [
-  { to: "/config/usuarios", label: "Usuários",   icon: Users },
-  { to: "/plans",           label: "Convênios",  icon: Tag },
-  { to: "/categories",      label: "Categorias", icon: FolderHeart },
+  { to: "/config/usuarios", label: "Usuários",   icon: Users,       modulo: "usuarios" as Modulo | null },
+  { to: "/plans",           label: "Convênios",  icon: Tag,         modulo: "configuracoes" as Modulo | null },
+  { to: "/categories",      label: "Categorias", icon: FolderHeart, modulo: "configuracoes" as Modulo | null },
 ] as const;
+
+const ALL_NAV_ITEMS = [...mainNavItems, ...financeItems, ...configItems];
 
 function NavItem({ 
   item, pathname, isCollapsed, setMobileOpen 
@@ -62,10 +65,10 @@ function NavItem({
 }
 
 function AppLayout() {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   const nav = useNavigate();
   const { pathname } = useLocation();
-  
+
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -73,8 +76,37 @@ function AppLayout() {
     if (!loading && !user) nav({ to: "/auth" });
   }, [loading, user, nav]);
 
-  if (loading || !user) {
+  const visibleMain = mainNavItems.filter((item) => !item.modulo || temAcesso(profile, item.modulo));
+  const visibleFinance = financeItems.filter((item) => !item.modulo || temAcesso(profile, item.modulo));
+  const visibleConfig = configItems.filter((item) => !item.modulo || temAcesso(profile, item.modulo));
+
+  useEffect(() => {
+    if (loading || !user || !profile) return;
+    const current = ALL_NAV_ITEMS.find((item) => pathname.startsWith(item.to));
+    if (current?.modulo && !temAcesso(profile, current.modulo)) {
+      nav({ to: "/overview" });
+    }
+  }, [loading, user, profile, pathname, nav]);
+
+  if (loading || !user || !profile) {
     return <div className="grid min-h-screen place-items-center text-muted-foreground">Carregando...</div>;
+  }
+
+  if (!profile.ativo) {
+    return (
+      <div className="grid min-h-screen place-items-center px-6 text-center">
+        <div>
+          <p className="font-display text-lg font-bold text-[#8C4F4A]">Conta desativada</p>
+          <p className="mt-2 text-sm text-muted-foreground">Fale com o administrador da clínica para reativar seu acesso.</p>
+          <button
+            onClick={() => supabase.auth.signOut().then(() => nav({ to: "/" }))}
+            className="mt-4 text-sm font-medium text-[#8C4F4A] hover:underline"
+          >
+            Sair
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -129,35 +161,43 @@ function AppLayout() {
         <nav className="custom-scrollbar flex-1 overflow-y-auto overflow-x-hidden px-3 py-6 flex flex-col gap-2">
           
           {/* Menu Principal */}
-          {mainNavItems.map((item) => (
-            <NavItem 
-              key={item.to} 
-              item={item} 
-              pathname={pathname} 
-              isCollapsed={isCollapsed} 
-              setMobileOpen={setMobileOpen} 
+          {visibleMain.map((item) => (
+            <NavItem
+              key={item.to}
+              item={item}
+              pathname={pathname}
+              isCollapsed={isCollapsed}
+              setMobileOpen={setMobileOpen}
             />
           ))}
 
-          <div className="my-2 border-t border-[#D0A5A0]/20" />
+          {visibleFinance.length > 0 && (
+            <>
+              <div className="my-2 border-t border-[#D0A5A0]/20" />
 
-          {/* Módulo Financeiro */}
-          {!isCollapsed && <span className="px-4 text-xs font-bold text-[#8C4F4A]/60 uppercase tracking-wider mt-2 mb-1">Finanças</span>}
-          {financeItems.map((item) => (
-            <NavItem 
-              key={item.to} 
-              item={item} 
-              pathname={pathname} 
-              isCollapsed={isCollapsed} 
-              setMobileOpen={setMobileOpen} 
-            />
-          ))}
+              {/* Módulo Financeiro */}
+              {!isCollapsed && <span className="px-4 text-xs font-bold text-[#8C4F4A]/60 uppercase tracking-wider mt-2 mb-1">Finanças</span>}
+              {visibleFinance.map((item) => (
+                <NavItem
+                  key={item.to}
+                  item={item}
+                  pathname={pathname}
+                  isCollapsed={isCollapsed}
+                  setMobileOpen={setMobileOpen}
+                />
+              ))}
+            </>
+          )}
 
-          <div className="my-2 border-t border-[#D0A5A0]/20" />
+          {visibleConfig.length > 0 && (
+            <>
+              <div className="my-2 border-t border-[#D0A5A0]/20" />
 
-          {/* Módulo Sistema */}
-          {!isCollapsed && <span className="px-4 text-xs font-bold text-[#8C4F4A]/60 uppercase tracking-wider mt-2 mb-1">Sistema</span>}
-          {configItems.map((item) => (
+              {/* Módulo Sistema */}
+              {!isCollapsed && <span className="px-4 text-xs font-bold text-[#8C4F4A]/60 uppercase tracking-wider mt-2 mb-1">Sistema</span>}
+            </>
+          )}
+          {visibleConfig.map((item) => (
             <NavItem 
               key={item.to} 
               item={item} 

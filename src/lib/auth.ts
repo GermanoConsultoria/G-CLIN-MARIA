@@ -1,6 +1,7 @@
 export type Modulo =
   | "agendamentos"
   | "servicos"
+  | "pacientes"
   | "financeiro"
   | "usuarios"
   | "configuracoes";
@@ -8,6 +9,7 @@ export type Modulo =
 export const MODULOS_LABELS: Record<Modulo, string> = {
   agendamentos: "Agendamentos",
   servicos: "Serviços",
+  pacientes: "Pacientes",
   financeiro: "Financeiro",
   usuarios: "Usuários",
   configuracoes: "Configurações",
