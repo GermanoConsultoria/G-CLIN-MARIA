@@ -51,26 +51,26 @@
   --card-foreground:     #1A1614;
   --popover-foreground:  #1A1614;
 
-  /* Primária — dourado escuro (contraste 7:1) */
-  --primary:             #7C5C1E;
+  /* Primária — rosé escuro (contraste 7:1) */
+  --primary:             #7A3E3A;
   --primary-foreground:  #FFFFFF;
 
   /* Secundária */
-  --secondary:           #F0EBE2;
-  --secondary-foreground:#4A3A28;
+  --secondary:           #F3E4E2;
+  --secondary-foreground:#5C3532;
 
   /* Muted */
   --muted:               #E8E6E3;
   --muted-foreground:    #888072;
 
-  /* Accent — dourado claro decorativo */
-  --accent:              #F5EDE0;
-  --accent-foreground:   #5C4318;
+  /* Accent — rosé claro decorativo */
+  --accent:              #F3E4E2;
+  --accent-foreground:   #6B3A36;
 
   /* Bordas e inputs */
   --border:              #E8E6E3;
-  --input:               #F0EBE2;
-  --ring:                #C9A96E;
+  --input:               #F3E4E2;
+  --ring:                #D0A5A0;
 
   /* Status */
   --destructive:         #C0392B;
@@ -83,9 +83,9 @@
   --whatsapp-foreground: #FFFFFF;
 
   /* Decorativo */
-  --gradient-hero: linear-gradient(135deg, #7C5C1E 0%, #C9A96E 50%, #F5EDE0 100%);
-  --shadow-soft: 0 4px 24px rgba(124, 92, 30, 0.18);
-  --gold-mid:            #C9A96E;
+  --gradient-hero: linear-gradient(135deg, #7A3E3A 0%, #D0A5A0 50%, #F3E4E2 100%);
+  --shadow-soft: 0 4px 24px rgba(122, 62, 58, 0.18);
+  --gold-mid:            #D0A5A0;
   --shadow-card:   0 1px 4px rgba(0,0,0,0.07);
 }
 
@@ -107,10 +107,10 @@
     background: transparent;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #E7D5C1;
+    background: #E7CBC7;
     border-radius: 999px;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #C8A56A;
+    background: #D0A5A0;
   }
 }

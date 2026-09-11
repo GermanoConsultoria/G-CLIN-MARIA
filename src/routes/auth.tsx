@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import gtechLogo from "@/assets/g-tech-logo.png";
-import logoGabriela from "@/assets/logo_gabriela.jpeg";
+import logoMaria from "@/assets/logo_maria.png";
 
 export const Route = createFileRoute("/auth")({ component: AuthPage });
 
@@ -63,35 +63,25 @@ function AuthPage() {
         {/* Logo */}
         <Link to="/" className="flex flex-col items-center gap-3">
           <img
-            src={logoGabriela}
-            alt="Gabriela Clínica de Estética"
-            className="h-24 w-24 rounded-full border-4 border-[#C8A56A] object-cover shadow-lg"
-            style={{ boxShadow: "0 4px 24px rgba(200,165,106,0.25)" }}
+            src={logoMaria}
+            alt="Maria Carolina Clínica de Estética"
+            className="h-32 w-auto max-w-[280px] object-contain"
+            style={{ filter: "drop-shadow(0 4px 24px rgba(208,165,160,0.35))" }}
           />
           <div className="flex items-center gap-2">
-            <div
-              className="grid h-8 w-8 place-items-center rounded-lg text-white"
-              style={{ background: "linear-gradient(135deg, #D8BC85 0%, #C8A56A 50%, #A87C3F 100%)" }}
-            >
-              <img
-                src={logoGabriela}
-                alt=""
-                className="h-6 w-6 rounded object-cover"
-              />
-            </div>
             <span className="font-display text-xl font-bold text-[#4B3A2A]">G-Clin</span>
           </div>
-          <p className="text-sm text-[#6E5A45]">Gabriela Clínica de Estética</p>
+          <p className="text-sm text-[#6E5A45]">Maria Carolina Clínica de Estética</p>
         </Link>
 
         {/* Card de login */}
-        <div className="rounded-2xl border border-[#E7D5C1] bg-white p-6 shadow-sm">
+        <div className="rounded-2xl border border-[#E7CBC7] bg-white p-6 shadow-sm">
           <Tabs defaultValue="signin">
-            <TabsList className="grid w-full grid-cols-2 bg-[#F3E7D7]">
-              <TabsTrigger value="signin" className="data-[state=active]:bg-[#C8A56A] data-[state=active]:text-white">
+            <TabsList className="grid w-full grid-cols-2 bg-[#F3E0DD]">
+              <TabsTrigger value="signin" className="data-[state=active]:bg-[#D0A5A0] data-[state=active]:text-white">
                 Entrar
               </TabsTrigger>
-              <TabsTrigger value="signup" className="data-[state=active]:bg-[#C8A56A] data-[state=active]:text-white">
+              <TabsTrigger value="signup" className="data-[state=active]:bg-[#D0A5A0] data-[state=active]:text-white">
                 Criar conta
               </TabsTrigger>
             </TabsList>
@@ -104,7 +94,7 @@ function AuthPage() {
                   type="submit"
                   disabled={loading}
                   className="w-full text-white font-semibold"
-                  style={{ background: "linear-gradient(135deg, #D8BC85 0%, #C8A56A 50%, #A87C3F 100%)" }}
+                  style={{ background: "linear-gradient(135deg, #DCB8B4 0%, #D0A5A0 50%, #8C4F4A 100%)" }}
                 >
                   {loading ? "Entrando..." : "Entrar"}
                 </Button>
@@ -119,7 +109,7 @@ function AuthPage() {
                   type="submit"
                   disabled={loading}
                   className="w-full text-white font-semibold"
-                  style={{ background: "linear-gradient(135deg, #D8BC85 0%, #C8A56A 50%, #A87C3F 100%)" }}
+                  style={{ background: "linear-gradient(135deg, #DCB8B4 0%, #D0A5A0 50%, #8C4F4A 100%)" }}
                 >
                   {loading ? "Criando..." : "Criar conta"}
                 </Button>
@@ -129,7 +119,7 @@ function AuthPage() {
         </div>
 
         {/* Rodapé */}
-        <div className="flex flex-col items-center gap-2 rounded-xl border border-[#E7D5C1] bg-white/60 p-4 text-center">
+        <div className="flex flex-col items-center gap-2 rounded-xl border border-[#E7CBC7] bg-white/60 p-4 text-center">
           <span className="text-xs uppercase tracking-widest text-[#6E5A45]">Desenvolvido por</span>
           <img src={gtechLogo} alt="G-Tech" className="h-14 w-14 rounded-lg shadow-sm" />
           <span className="font-display text-base font-bold tracking-wide text-[#4B3A2A]">G-Tech</span>
@@ -157,7 +147,7 @@ function Field({
         onChange={(e) => onChange(e.target.value)}
         required
         minLength={type === "password" ? 8 : undefined}
-        className="border-[#E7D5C1] focus-visible:ring-[#C8A56A] bg-[#FAF6F1]"
+        className="border-[#E7CBC7] focus-visible:ring-[#D0A5A0] bg-[#FAF6F1]"
       />
     </div>
   );

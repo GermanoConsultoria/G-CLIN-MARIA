@@ -5,7 +5,7 @@ import { ptBR } from "date-fns/locale";
 import { CheckCircle2, ChevronDown, Clock, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { generateSlotsForDay, type BusinessHoursRow } from "@/lib/business-hours";
-import logoGabriela from "@/assets/logo_gabriela.jpeg";
+import logoMaria from "@/assets/logo_maria.png";
 
 export const Route = createFileRoute("/agendar")({ component: AgendarPage });
 
@@ -32,7 +32,7 @@ const CATEGORIAS = [
   { value: "outros",           label: "Outros" },
 ];
 
-const GOLD = "linear-gradient(135deg, #D8BC85 0%, #C8A56A 50%, #A87C3F 100%)";
+const GOLD = "linear-gradient(135deg, #DCB8B4 0%, #D0A5A0 50%, #8C4F4A 100%)";
 
 function formatPhone(raw: string): string {
   const digits = raw.replace(/\D/g, "").slice(0, 11);
@@ -250,7 +250,7 @@ function AgendarPage() {
           <h2 className="font-display text-2xl font-bold text-[#4B3A2A]">Agendamento confirmado!</h2>
           <p className="mt-2 text-sm text-[#6E5A45]">Obrigada pela preferência 🎉</p>
 
-          <div className="mt-6 rounded-2xl border border-[#E7D5C1] bg-white p-5 text-left space-y-4">
+          <div className="mt-6 rounded-2xl border border-[#E7CBC7] bg-white p-5 text-left space-y-4">
             {(
               [
                 { label: "Nome",    value: confirmed.name },
@@ -289,10 +289,10 @@ function AgendarPage() {
     <div className="min-h-screen bg-[#FAF6F1]">
       <header className="flex flex-col items-center gap-4 px-6 pt-10 pb-8">
         <img
-          src={logoGabriela}
-          alt="Dra. Gabriela"
-          className="h-20 w-20 rounded-full object-cover"
-          style={{ border: "4px solid #C8A56A", boxShadow: "0 4px 20px rgba(200,165,106,0.3)" }}
+          src={logoMaria}
+          alt="Dra. Maria Carolina"
+          className="h-32 w-auto max-w-[300px] object-contain"
+          style={{ filter: "drop-shadow(0 4px 20px rgba(208,165,160,0.35))" }}
         />
         <div className="text-center">
           <h1 className="font-display text-2xl font-bold text-[#4B3A2A]">Agende seu procedimento</h1>
@@ -301,7 +301,7 @@ function AgendarPage() {
       </header>
 
       <main className="mx-auto max-w-[480px] px-4 pb-16">
-        <div className="rounded-2xl border border-[#E7D5C1] bg-white p-6 shadow-sm">
+        <div className="rounded-2xl border border-[#E7CBC7] bg-white p-6 shadow-sm">
           <form onSubmit={handleSubmit} className="space-y-5">
 
             {/* Nome */}
@@ -330,13 +330,13 @@ function AgendarPage() {
             {/* Serviço */}
             <Field label="Serviço *">
               {initialLoading ? (
-                <div className="h-11 animate-pulse rounded-lg bg-[#F3E7D7]" />
+                <div className="h-11 animate-pulse rounded-lg bg-[#F3E0DD]" />
               ) : (
                 <div ref={dropRef} className="relative">
                   <button
                     type="button"
                     onClick={() => setDropOpen((v) => !v)}
-                    className="flex w-full items-center justify-between rounded-md border border-[#E7D5C1] bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-[#C8A56A] focus:ring-offset-2 transition"
+                    className="flex w-full items-center justify-between rounded-md border border-[#E7CBC7] bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-[#D0A5A0] focus:ring-offset-2 transition"
                   >
                     <span className={selectedService ? "text-[#4B3A2A]" : "text-[#9B8575]"}>
                       {selectedService ? selectedService.name : "Selecione um serviço..."}
@@ -348,7 +348,7 @@ function AgendarPage() {
                   </button>
 
                   {dropOpen && (
-                    <div className="absolute left-0 right-0 top-full z-[200] mt-1 max-h-72 overflow-y-auto rounded-xl border border-[#E7D5C1] bg-white shadow-2xl">
+                    <div className="absolute left-0 right-0 top-full z-[200] mt-1 max-h-72 overflow-y-auto rounded-xl border border-[#E7CBC7] bg-white shadow-2xl">
                       {grupos.length === 0 ? (
                         <div className="px-4 py-6 text-center text-sm text-[#9B8575]">
                           Nenhum serviço disponível
@@ -360,7 +360,7 @@ function AgendarPage() {
                               type="button"
                               className="flex w-full cursor-default items-center px-3 py-2"
                             >
-                              <span className="text-sm font-semibold" style={{ color: "#A87C3F" }}>
+                              <span className="text-sm font-semibold" style={{ color: "#8C4F4A" }}>
                                 {grupo.label}
                               </span>
                             </button>
@@ -370,7 +370,7 @@ function AgendarPage() {
                                 type="button"
                                 onClick={() => { setServiceId(svc.id); setDropOpen(false); setTime(""); }}
                                 className={`flex w-full items-center justify-between px-5 py-2.5 text-left text-sm transition-colors hover:bg-[#FAF6F1] ${
-                                  serviceId === svc.id ? "bg-[#FDF8F2] text-[#A87C3F]" : "text-[#4B3A2A]"
+                                  serviceId === svc.id ? "bg-[#FBF1F0] text-[#8C4F4A]" : "text-[#4B3A2A]"
                                 }`}
                               >
                                 <span>{svc.name}</span>
@@ -424,17 +424,17 @@ function AgendarPage() {
                 {loadingSlots ? (
                   <div className="grid grid-cols-5 gap-1.5 rounded-xl border bg-[#FAF6F1] p-2">
                     {Array.from({ length: 10 }).map((_, i) => (
-                      <div key={i} className="h-8 animate-pulse rounded-lg bg-[#F3E7D7]" />
+                      <div key={i} className="h-8 animate-pulse rounded-lg bg-[#F3E0DD]" />
                     ))}
                   </div>
                 ) : isDayClosed || slots.length === 0 ? (
-                  <div className="rounded-xl border border-dashed border-[#E7D5C1] bg-[#FAF6F1] p-4 text-center text-xs text-[#9B8575]">
+                  <div className="rounded-xl border border-dashed border-[#E7CBC7] bg-[#FAF6F1] p-4 text-center text-xs text-[#9B8575]">
                     {isDayClosed
                       ? "Este dia está fechado. Escolha outra data."
                       : "Nenhum horário disponível para esta data. Escolha outra data."}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-5 gap-1.5 max-h-40 overflow-y-auto rounded-xl border border-[#E7D5C1] bg-[#FAF6F1] p-2">
+                  <div className="grid grid-cols-5 gap-1.5 max-h-40 overflow-y-auto rounded-xl border border-[#E7CBC7] bg-[#FAF6F1] p-2">
                     {slots.map((slot) => {
                       const past = isSlotPast(slot, date, now);
                       return (
@@ -450,7 +450,7 @@ function AgendarPage() {
                               ? "cursor-not-allowed border border-gray-200 bg-gray-100 text-gray-400 opacity-40"
                               : time === slot
                                 ? "text-white"
-                                : "border border-[#E7D5C1] bg-white text-[#4B3A2A] hover:border-[#C8A56A] hover:text-[#A87C3F]"
+                                : "border border-[#E7CBC7] bg-white text-[#4B3A2A] hover:border-[#D0A5A0] hover:text-[#8C4F4A]"
                           }`}
                           style={!past && time === slot ? { background: GOLD } : undefined}
                         >
@@ -462,17 +462,17 @@ function AgendarPage() {
                 )}
                 {time && !isSlotPast(time, date, now) && (
                   <p className="mt-1 text-xs text-[#9B8575]">
-                    Selecionado: <span className="font-semibold text-[#A87C3F]">{time}</span>
+                    Selecionado: <span className="font-semibold text-[#8C4F4A]">{time}</span>
                   </p>
                 )}
               </Field>
             )}
 
             {/* Aceita antecipar */}
-            <div className="flex items-center justify-between rounded-xl border border-[#E7D5C1] bg-[#FAF6F1] p-3">
+            <div className="flex items-center justify-between rounded-xl border border-[#E7CBC7] bg-[#FAF6F1] p-3">
               <div className="space-y-0.5">
                 <div className="flex items-center gap-1.5 text-sm font-medium text-[#4B3A2A]">
-                  <Zap size={14} className="text-[#A87C3F]" /> Aceita antecipar?
+                  <Zap size={14} className="text-[#8C4F4A]" /> Aceita antecipar?
                 </div>
                 <p className="text-xs text-[#9B8575]">Será avisado se surgir uma vaga antes.</p>
               </div>
@@ -481,8 +481,8 @@ function AgendarPage() {
                 role="switch"
                 aria-checked={anticipate}
                 onClick={() => setAnticipate((v) => !v)}
-                className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-[#C8A56A] focus:ring-offset-2"
-                style={{ background: anticipate ? "#A87C3F" : "#D1C3B5" }}
+                className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-[#D0A5A0] focus:ring-offset-2"
+                style={{ background: anticipate ? "#8C4F4A" : "#D1C3B5" }}
               >
                 <span
                   className="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-lg transition-transform"
@@ -497,7 +497,7 @@ function AgendarPage() {
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
-                placeholder="Alguma informação adicional para a Dra. Gabriela?"
+                placeholder="Alguma informação adicional para a Dra. Maria Carolina?"
                 className="fi resize-none"
               />
             </Field>
@@ -524,7 +524,7 @@ function AgendarPage() {
         .fi {
           width: 100%;
           border-radius: 0.5rem;
-          border: 1px solid #E7D5C1;
+          border: 1px solid #E7CBC7;
           background: white;
           padding: 0.625rem 0.75rem;
           font-size: 0.875rem;
@@ -535,8 +535,8 @@ function AgendarPage() {
         }
         .fi::placeholder { color: #9B8575; }
         .fi:focus {
-          border-color: #C8A56A;
-          box-shadow: 0 0 0 2px rgba(200,165,106,0.2);
+          border-color: #D0A5A0;
+          box-shadow: 0 0 0 2px rgba(208,165,160,0.2);
         }
       `}</style>
     </div>

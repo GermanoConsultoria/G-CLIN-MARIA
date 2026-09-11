@@ -70,8 +70,8 @@ function NovoPacienteDialog({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
       <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-[#C8A56A]/20 px-6 py-4">
-          <h2 className="font-display text-lg font-bold text-[#A87C3F]">Novo Paciente</h2>
+        <div className="flex items-center justify-between border-b border-[#D0A5A0]/20 px-6 py-4">
+          <h2 className="font-display text-lg font-bold text-[#8C4F4A]">Novo Paciente</h2>
           <button onClick={onClose} className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100">
             <X className="h-5 w-5" />
           </button>
@@ -107,7 +107,7 @@ function NovoPacienteDialog({
             <select
               value={form.estado_civil}
               onChange={field("estado_civil")}
-              className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus:border-[#C8A56A] focus:outline-none"
+              className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus:border-[#D0A5A0] focus:outline-none"
             >
               <option value="">Selecione</option>
               <option>Solteiro(a)</option>
@@ -139,7 +139,7 @@ function NovoPacienteDialog({
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 border-t border-[#C8A56A]/20 px-6 py-4">
+        <div className="flex justify-end gap-3 border-t border-[#D0A5A0]/20 px-6 py-4">
           <button
             onClick={onClose}
             className="rounded-lg px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100"
@@ -149,7 +149,7 @@ function NovoPacienteDialog({
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center gap-2 rounded-lg bg-[#A87C3F] px-5 py-2 text-sm font-semibold text-white hover:bg-[#8B6735] disabled:opacity-60"
+            className="flex items-center gap-2 rounded-lg bg-[#8C4F4A] px-5 py-2 text-sm font-semibold text-white hover:bg-[#74423D] disabled:opacity-60"
           >
             {saving && <Loader2 className="h-4 w-4 animate-spin" />}
             Salvar Paciente
@@ -168,7 +168,7 @@ function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
       {...props}
-      className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus:border-[#C8A56A] focus:outline-none focus:ring-2 focus:ring-[#C8A56A]/20"
+      className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus:border-[#D0A5A0] focus:outline-none focus:ring-2 focus:ring-[#D0A5A0]/20"
     />
   );
 }
@@ -215,14 +215,14 @@ function Pacientes() {
     <div className="mx-auto max-w-5xl">
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-display text-2xl font-bold text-[#A87C3F]">Pacientes</h1>
+          <h1 className="font-display text-2xl font-bold text-[#8C4F4A]">Pacientes</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {pacientes.length} paciente{pacientes.length !== 1 ? "s" : ""} cadastrado{pacientes.length !== 1 ? "s" : ""}
           </p>
         </div>
         <button
           onClick={() => setShowDialog(true)}
-          className="flex items-center gap-2 rounded-xl bg-[#A87C3F] px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-[#8B6735] transition-colors"
+          className="flex items-center gap-2 rounded-xl bg-[#8C4F4A] px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-[#74423D] transition-colors"
         >
           <UserPlus className="h-4 w-4" />
           Nova Paciente
@@ -235,7 +235,7 @@ function Pacientes() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Buscar por nome, telefone ou e-mail..."
-          className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-10 pr-4 text-sm shadow-sm focus:border-[#C8A56A] focus:outline-none focus:ring-2 focus:ring-[#C8A56A]/20"
+          className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-10 pr-4 text-sm shadow-sm focus:border-[#D0A5A0] focus:outline-none focus:ring-2 focus:ring-[#D0A5A0]/20"
         />
         {search && (
           <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -246,12 +246,12 @@ function Pacientes() {
 
       {loading ? (
         <div className="flex items-center justify-center py-24">
-          <Loader2 className="h-8 w-8 animate-spin text-[#C8A56A]" />
+          <Loader2 className="h-8 w-8 animate-spin text-[#D0A5A0]" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed border-[#C8A56A]/30 py-24 text-center">
-          <div className="rounded-full bg-[#C8A56A]/10 p-4">
-            <Users className="h-8 w-8 text-[#C8A56A]" />
+        <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed border-[#D0A5A0]/30 py-24 text-center">
+          <div className="rounded-full bg-[#D0A5A0]/10 p-4">
+            <Users className="h-8 w-8 text-[#D0A5A0]" />
           </div>
           <div>
             <p className="font-semibold text-gray-700">
@@ -271,7 +271,7 @@ function Pacientes() {
                 params={{ pacienteId: p.id }}
                 className="group flex items-center gap-4 ..."
             >
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#C8A56A]/15 text-[#A87C3F] font-bold text-lg">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#D0A5A0]/15 text-[#8C4F4A] font-bold text-lg">
                 {p.nome.charAt(0).toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
@@ -295,9 +295,9 @@ function Pacientes() {
                   )}
                 </div>
               </div>
-              <div className="flex shrink-0 items-center gap-2 text-[#A87C3F]">
+              <div className="flex shrink-0 items-center gap-2 text-[#8C4F4A]">
                 <FolderOpen className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <ChevronRight className="h-5 w-5 text-gray-300 group-hover:text-[#C8A56A] transition-colors" />
+                <ChevronRight className="h-5 w-5 text-gray-300 group-hover:text-[#D0A5A0] transition-colors" />
               </div>
             </Link>
           ))}

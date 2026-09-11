@@ -109,14 +109,14 @@ function buildWhatsappMsg(kind: "agendamento" | "confirmacao" | "lembrete" | "re
 }): string {
   const when = format(opts.scheduledAt, "EEEE, dd 'de' MMMM 'às' HH:mm", { locale: ptBR });
   const servico = opts.serviceName ? ` — *${opts.serviceName}*` : "";
-  const regras = "\n\n⚠️ *Lembretes importantes:*\n• Em caso de falta ou cancelamento com menos de 24h, o próximo atendimento terá custo adicional\n\nDra. Gabriela Oliveira 💛";
+  const regras = "\n\n⚠️ *Lembretes importantes:*\n• Em caso de falta ou cancelamento com menos de 24h, o próximo atendimento terá custo adicional\n\nDra. Maria Carolina 💛";
   switch (kind) {
     case "agendamento":
-      return `Olá, ${opts.clientName}! 👋\n\nSeu agendamento${servico} com a *Dra. Gabriela Oliveira* foi confirmado para *${when}*. 🎉${regras}\n\nQualquer dúvida, é só responder esta mensagem!`;
+      return `Olá, ${opts.clientName}! 👋\n\nSeu agendamento${servico} com a *Dra. Maria Carolina* foi confirmado para *${when}*. 🎉${regras}\n\nQualquer dúvida, é só responder esta mensagem!`;
     case "confirmacao":
-      return `Olá, ${opts.clientName}! 😊\n\nA *Dra. Gabriela Oliveira* está passando para confirmar seu procedimento${servico} *amanhã*, *${when}*.\n\nPor favor, confirme respondendo *SIM* ✅ ou *NÃO* ❌.${regras}`;
+      return `Olá, ${opts.clientName}! 😊\n\nA *Dra. Maria Carolina* está passando para confirmar seu procedimento${servico} *amanhã*, *${when}*.\n\nPor favor, confirme respondendo *SIM* ✅ ou *NÃO* ❌.${regras}`;
     case "lembrete":
-      return `Olá, ${opts.clientName}! ⏰\n\nSeu procedimento${servico} com a *Dra. Gabriela Oliveira* começa em *10 minutos* — *${when}*.\n\nEstamos te esperando! 💛`;
+      return `Olá, ${opts.clientName}! ⏰\n\nSeu procedimento${servico} com a *Dra. Maria Carolina* começa em *10 minutos* — *${when}*.\n\nEstamos te esperando! 💛`;
     case "reagendamento":
       return `Olá, ${opts.clientName}! Precisamos *reagendar* seu procedimento${servico} que estava marcado para ${when}.\n\nPor favor, entre em contato para escolher um novo horário. 📅`;
     case "antecipar": {
@@ -859,12 +859,12 @@ function ServicoSelect({
                 onClick={() => toggleGrupo(grupo.value)}
                 className="flex w-full items-center justify-between px-3 py-2 hover:bg-muted/30 transition-colors"
               >
-                <span className="text-sm font-semibold" style={{ color: "#A87C3F" }}>
+                <span className="text-sm font-semibold" style={{ color: "#8C4F4A" }}>
                   {grupo.label}
                 </span>
                 <ChevronDown
                   size={13}
-                  style={{ color: "#C8A56A" }}
+                  style={{ color: "#D0A5A0" }}
                   className={`transition-transform duration-150 ${expandidos[grupo.value] ? "rotate-180" : ""}`}
                 />
               </button>
