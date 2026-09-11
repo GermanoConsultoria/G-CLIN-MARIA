@@ -11,7 +11,10 @@
   // Nao use aqui as chaves de local dev (.env) — configure via `wrangler secret put`
   // para valores sensiveis, e `vars` abaixo apenas para os publicos (URL, anon key).
   "vars": {
-    "VITE_SUPABASE_URL": "",
-    "VITE_SUPABASE_PUBLISHABLE_KEY": ""
+    "SUPABASE_URL": "https://ockkujdwydcazaidkcnx.supabase.co",
+    "SUPABASE_PUBLISHABLE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ja2t1amR3eWRjYXphaWRrY254Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxNTEyNTEsImV4cCI6MjEwNDcyNzI1MX0.S_N1BH61s4PEPe6FCrynKTDd2SFJCH8jsUqjt8y7Gz0",
+    "VITE_SUPABASE_URL": "https://ockkujdwydcazaidkcnx.supabase.co",
+    "VITE_SUPABASE_PUBLISHABLE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ja2t1amR3eWRjYXphaWRrY254Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxNTEyNTEsImV4cCI6MjEwNDcyNzI1MX0.S_N1BH61s4PEPe6FCrynKTDd2SFJCH8jsUqjt8y7Gz0",
+    "VITE_CLINIC_USER_ID": "4891797c-b715-4742-b44c-8539fa929a7b"
   }
 }
