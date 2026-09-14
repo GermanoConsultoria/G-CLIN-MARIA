@@ -66,8 +66,24 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
   return brandedErrorResponse();
 }
 
+// Cloudflare Workers does NOT expose `vars`/`secrets` on `process.env` by
+// default — they only arrive via the `env` binding passed into `fetch`.
+// Our Supabase integration code (auth-middleware.ts, client.server.ts,
+// usuarios.functions.ts) reads `process.env.SUPABASE_*` directly, so without
+// this every authenticated server function threw "Missing Supabase
+// environment variable(s)" in production.
+function populateProcessEnv(env: unknown): void {
+  if (!env || typeof env !== "object") return;
+  for (const [key, value] of Object.entries(env as Record<string, unknown>)) {
+    if (typeof value === "string") {
+      process.env[key] = value;
+    }
+  }
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
+    populateProcessEnv(env);
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
