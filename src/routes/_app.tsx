@@ -128,21 +128,19 @@ function AppLayout() {
         `}
       >
         {/* Cabeçalho da Sidebar */}
-        <div className="flex h-24 items-center justify-between px-4 border-b border-[#D0A5A0]/10">
-          <div className={`flex items-center gap-3 overflow-hidden transition-opacity duration-300 ${isCollapsed ? "opacity-0 w-0 hidden lg:flex" : "opacity-100 w-auto"}`}>
+        <div className="relative flex items-center justify-between px-4 py-4 border-b border-[#D0A5A0]/10">
+          <div className={`flex flex-1 flex-col items-center gap-1 overflow-hidden text-center transition-opacity duration-300 ${isCollapsed ? "opacity-0 w-0 hidden lg:flex" : "opacity-100 w-auto"}`}>
             <img
               src={logoMaria}
               alt="Dra. Maria Carolina"
               className="h-14 w-auto max-w-[140px] shrink-0 object-contain"
             />
-            <div className="flex flex-col">
-              <span className="font-display text-sm font-bold text-[#8C4F4A] whitespace-nowrap">Dra. Maria Carolina</span>
-            </div>
+            <span className="font-display text-sm font-bold text-[#8C4F4A]">Dra. Maria Carolina</span>
           </div>
-          
+
           {/* Botão Hamburger Desktop */}
           <button
-            className="hidden lg:flex p-2 rounded-md text-[#8C4F4A] hover:bg-black/5 transition-colors mx-auto"
+            className="hidden lg:flex absolute right-4 top-4 p-2 rounded-md text-[#8C4F4A] hover:bg-black/5 transition-colors"
             onClick={() => setIsCollapsed(!isCollapsed)}
           >
             <Menu className="h-6 w-6" />
@@ -150,7 +148,7 @@ function AppLayout() {
 
           {/* Botão Fechar Mobile */}
           <button
-            className="lg:hidden text-gray-400 hover:text-gray-600 p-2"
+            className="lg:hidden absolute right-4 top-4 text-gray-400 hover:text-gray-600 p-2"
             onClick={() => setMobileOpen(false)}
           >
             <X className="h-5 w-5" />
