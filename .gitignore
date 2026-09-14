@@ -19,6 +19,10 @@ dist
 .env
 .env.*
 !.env.example
+# .env.production só tem valores públicos (URL/anon key protegidos por RLS,
+# já expostos no bundle do navegador) — precisa estar versionado para o
+# Cloudflare Workers Builds conseguir embutir VITE_* no build automático.
+!.env.production
 
 # Supabase CLI local state
 supabase/.temp
