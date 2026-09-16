@@ -1,11 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import jsPDF from "jspdf";
+import QRCode from "qrcode";
 import logoMaria from "@/assets/logo_maria.png";
 import {
   ArrowLeft, FileText, Upload, Trash2, Download, Eye,
   Loader2, FilePlus, ClipboardList, FolderOpen, X,
   CheckCircle2, Phone, Mail, MapPin, Cake, Plus,
+  PenLine, Copy, User, Stethoscope,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -31,7 +33,10 @@ type Arquivo = {
   url: string; tamanho: number | null; created_at: string;
 };
 
-type FichaResumo = { id: string; data_avaliacao: string; created_at: string };
+type FichaResumo = {
+  id: string; data_avaliacao: string; created_at: string;
+  assinado_em: string | null; assinado_medico_em: string | null;
+};
 type FichaData = Record<string, string | boolean | null>;
 type Aba = "anamnese" | "arquivos";
 
@@ -528,6 +533,11 @@ async function gerarPDF(formData: FichaData, paciente: Paciente): Promise<void> 
   const SIG_R = 115;
   const GRAY66 = [120, 120, 120] as const;
   const GRAY44 = [136, 136, 136] as const;
+  const SIG_H = 9;
+  const assinaturaImg = str("assinatura_imagem");
+  const assinaturaMedicoImg = str("assinatura_medico_imagem");
+  if (assinaturaImg) doc.addImage(assinaturaImg, "PNG", SIG_L, y - SIG_H - 0.5, SIG_W, SIG_H);
+  if (assinaturaMedicoImg) doc.addImage(assinaturaMedicoImg, "PNG", SIG_R, y - SIG_H - 0.5, SIG_W, SIG_H);
   dc(GRAY66); doc.setLineWidth(0.4);
   doc.line(SIG_L, y, SIG_L + SIG_W, y);
   doc.line(SIG_R, y, SIG_R + SIG_W, y);
@@ -536,9 +546,17 @@ async function gerarPDF(formData: FichaData, paciente: Paciente): Promise<void> 
   doc.text("Assinatura do Cliente",  SIG_L + SIG_W / 2, y, { align: "center" });
   doc.text("Dra. Maria Carolina", SIG_R + SIG_W / 2, y, { align: "center" });
   y += 4;
-  doc.setFontSize(7); doc.setFont("helvetica", "normal"); tc(GRAY44);
-  doc.text("(Assinatura via Gov)", SIG_L + SIG_W / 2, y, { align: "center" });
-  doc.text("(Assinatura via Gov)", SIG_R + SIG_W / 2, y, { align: "center" });
+  doc.setFontSize(6.5); doc.setFont("helvetica", "normal"); tc(GRAY44);
+  const assinadoEmStr = str("assinado_em");
+  const clienteSubLabel = assinaturaImg
+    ? `Assinado digitalmente${assinadoEmStr ? " em " + format(parseISO(assinadoEmStr), "dd/MM/yyyy HH:mm", { locale: ptBR }) : ""}`
+    : "(Assinatura via Gov)";
+  const assinadoMedicoEmStr = str("assinado_medico_em");
+  const medicoSubLabel = assinaturaMedicoImg
+    ? `Assinado digitalmente${assinadoMedicoEmStr ? " em " + format(parseISO(assinadoMedicoEmStr), "dd/MM/yyyy HH:mm", { locale: ptBR }) : ""}`
+    : "(Assinatura via Gov)";
+  doc.text(clienteSubLabel, SIG_L + SIG_W / 2, y, { align: "center" });
+  doc.text(medicoSubLabel, SIG_R + SIG_W / 2, y, { align: "center" });
 
   drawFooters();
 
@@ -568,16 +586,21 @@ function PacienteDetalhe() {
   const [showAnamnese, setShowAnamnese] = useState(false);
   const [fichaEditId, setFichaEditId] = useState<string | null>(null);
   const [downloadingPdf, setDownloadingPdf] = useState<string | null>(null);
+  const [assinar, setAssinar] = useState<{ fichaId: string; modo: "escolha" | "paciente" | "medica" } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  async function fetchAll() {
-    setLoading(true);
+  async function fetchAll(silent = false) {
+    // `silent` evita o spinner de tela cheia (que desmontaria modais abertos,
+    // como o de assinatura digital) em refetches de fundo — ex.: quando a
+    // paciente assina e o AssinarModal só quer atualizar o status sem se
+    // desmontar/remontar (o que geraria um token novo e voltaria pra "aguardando").
+    if (!silent) setLoading(true);
     const [pRes, aRes, fRes] = await Promise.all([
       db.from("pacientes").select("*").eq("id", pacienteId).single(),
       db.from("arquivos_paciente").select("*").eq("paciente_id", pacienteId).order("created_at", { ascending: false }),
-      db.from("fichas_anamnese").select("id,data_avaliacao,created_at").eq("paciente_id", pacienteId).order("created_at", { ascending: false }),
+      db.from("fichas_anamnese").select("id,data_avaliacao,created_at,assinado_em,assinado_medico_em").eq("paciente_id", pacienteId).order("created_at", { ascending: false }),
     ]);
-    setLoading(false);
+    if (!silent) setLoading(false);
     if (pRes.error) { toast.error("Paciente não encontrado"); navigate({ to: "/pacientes" as never }); return; }
     setPaciente(pRes.data as Paciente);
     setArquivos((aRes.data ?? []) as Arquivo[]);
@@ -612,6 +635,18 @@ function PacienteDetalhe() {
     if (error) { toast.error("Erro ao remover"); return; }
     toast.success("Arquivo removido");
     setArquivos((p) => p.filter((a) => a.id !== id));
+  }
+
+  async function handleCancelarAssinatura(fichaId: string) {
+    if (!confirm("Cancelar a(s) assinatura(s)? Será preciso assinar novamente.")) return;
+    const { data, error } = await db.from("fichas_anamnese").update({
+      assinatura_imagem: null, assinado_em: null, data_assinatura: null,
+      autorizado: false, autoriza_imagem: false,
+      assinatura_medico_imagem: null, assinado_medico_em: null,
+    }).eq("id", fichaId).select("id");
+    if (error || !data || data.length === 0) { toast.error("Erro ao cancelar assinatura"); return; }
+    toast.success("Assinatura(s) cancelada(s)");
+    fetchAll();
   }
 
   async function handleVisualizar(url: string) {
@@ -757,6 +792,25 @@ function PacienteDetalhe() {
                     </p>
                   </div>
                   <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
+                    {(() => {
+                      const qtdAssinaturas = (f.assinado_em ? 1 : 0) + (f.assinado_medico_em ? 1 : 0);
+                      if (qtdAssinaturas === 0) return null;
+                      const completo = qtdAssinaturas === 2;
+                      return (
+                        <button
+                          onClick={() => handleCancelarAssinatura(f.id)}
+                          className={`group flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-colors hover:bg-red-50 hover:text-red-600 ${
+                            completo ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"
+                          }`}
+                          title="Cancelar assinatura(s) (permite refazer)"
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5 group-hover:hidden" />
+                          <X className="hidden h-3.5 w-3.5 group-hover:block" />
+                          <span className="group-hover:hidden">{completo ? "Assinado" : "1 assinatura"}</span>
+                          <span className="hidden group-hover:inline">Cancelar</span>
+                        </button>
+                      );
+                    })()}
                     <button
                       onClick={async () => {
                         setDownloadingPdf(f.id);
@@ -772,6 +826,16 @@ function PacienteDetalhe() {
                         : <Download className="h-3.5 w-3.5" />}
                       <span>PDF</span>
                     </button>
+                    {!(f.assinado_em && f.assinado_medico_em) && (
+                      <button
+                        onClick={() => setAssinar({ fichaId: f.id, modo: "escolha" })}
+                        className="flex items-center gap-1.5 rounded-lg border border-[#D0A5A0] px-3 py-1.5 text-xs font-medium text-[#8C4F4A] hover:bg-[#D0A5A0]/10 transition-colors"
+                        title="Assinatura digital"
+                      >
+                        <PenLine className="h-3.5 w-3.5" />
+                        <span>Assinar</span>
+                      </button>
+                    )}
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="h-5 w-5 text-emerald-500" />
                       <span className="text-xs font-medium text-[#8C4F4A]">Ver / Editar →</span>
@@ -857,6 +921,216 @@ function PacienteDetalhe() {
           onSaved={() => { fetchAll(); setShowAnamnese(false); }}
         />
       )}
+
+      {assinar?.modo === "escolha" && (
+        <AssinarEscolhaModal
+          jaAssinouPaciente={!!fichas.find((f) => f.id === assinar.fichaId)?.assinado_em}
+          jaAssinouMedica={!!fichas.find((f) => f.id === assinar.fichaId)?.assinado_medico_em}
+          onClose={() => setAssinar(null)}
+          onEscolher={(modo) => setAssinar({ fichaId: assinar.fichaId, modo })}
+        />
+      )}
+
+      {(assinar?.modo === "paciente" || assinar?.modo === "medica") && (
+        <AssinarModal
+          fichaId={assinar.fichaId}
+          tipo={assinar.modo}
+          onClose={() => setAssinar(null)}
+          onSigned={() => fetchAll(true)}
+        />
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MODAL — ESCOLHA DE QUEM VAI ASSINAR
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function AssinarEscolhaModal({ jaAssinouPaciente, jaAssinouMedica, onClose, onEscolher }: {
+  jaAssinouPaciente: boolean;
+  jaAssinouMedica: boolean;
+  onClose: () => void;
+  onEscolher: (modo: "paciente" | "medica") => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <div className="relative w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+        <button onClick={onClose} className="absolute right-3 top-3 rounded-lg p-1.5 text-gray-400 hover:bg-gray-100">
+          <X className="h-5 w-5" />
+        </button>
+        <p className="text-center font-display text-lg font-bold text-[#8C4F4A]">Quem vai assinar?</p>
+        <p className="mt-1 text-center text-sm text-muted-foreground">
+          Escolha de quem é a assinatura digital deste prontuário.
+        </p>
+        <div className="mt-5 flex flex-col gap-3">
+          {!jaAssinouPaciente && (
+            <button
+              onClick={() => onEscolher("paciente")}
+              className="flex items-center gap-3 rounded-xl border border-[#D0A5A0] p-4 text-left hover:bg-[#D0A5A0]/10 transition-colors"
+            >
+              <User className="h-6 w-6 shrink-0 text-[#8C4F4A]" />
+              <div>
+                <p className="text-sm font-semibold text-[#8C4F4A]">Paciente</p>
+                <p className="text-xs text-muted-foreground">Gera QR code / link para assinar no celular</p>
+              </div>
+            </button>
+          )}
+          {!jaAssinouMedica && (
+            <button
+              onClick={() => onEscolher("medica")}
+              className="flex items-center gap-3 rounded-xl border border-[#D0A5A0] p-4 text-left hover:bg-[#D0A5A0]/10 transition-colors"
+            >
+              <Stethoscope className="h-6 w-6 shrink-0 text-[#8C4F4A]" />
+              <div>
+                <p className="text-sm font-semibold text-[#8C4F4A]">Médica</p>
+                <p className="text-xs text-muted-foreground">Assine agora mesmo, direto neste dispositivo</p>
+              </div>
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MODAL — ASSINATURA DIGITAL (QR CODE, PARA PACIENTE OU MÉDICA ASSINAREM NO CELULAR)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function AssinarModal({ fichaId, tipo, onClose, onSigned }: {
+  fichaId: string;
+  tipo: "paciente" | "medica";
+  onClose: () => void;
+  onSigned: () => void;
+}) {
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+  const [link, setLink] = useState("");
+  const [signed, setSigned] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState(false);
+
+  const campoAssinadoEm = tipo === "medica" ? "assinado_medico_em" : "assinado_em";
+  const quemAssina = tipo === "medica" ? "a médica" : "a paciente";
+
+  useEffect(() => {
+    // React StrictMode (usado pelo TanStack Start em dev) monta > desmonta > monta
+    // este efeito de novo. Sem AbortController, isso geraria DOIS tokens e DUAS
+    // escritas no banco — se a escrita "fantasma" do 1º mount terminasse depois da
+    // do 2º, o banco ficava com um token diferente do que estava na tela (QR/link
+    // sempre "inválido"). O AbortController cancela de verdade a requisição do
+    // mount descartado, então só a escrita do mount que sobrevive é concluída.
+    const controller = new AbortController();
+    let pollId: ReturnType<typeof setInterval> | undefined;
+
+    function markSigned() {
+      if (controller.signal.aborted) return;
+      setSigned(true);
+      onSigned();
+      if (pollId) clearInterval(pollId);
+    }
+
+    async function checkSigned() {
+      const { data } = await db.from("fichas_anamnese").select(campoAssinadoEm).eq("id", fichaId).single();
+      if (data?.[campoAssinadoEm]) markSigned();
+    }
+
+    // Abas em segundo plano têm o setInterval "throttled" pelo navegador (pode
+    // levar dezenas de segundos pra disparar de novo) — checar também ao voltar
+    // o foco garante que o status atualiza na hora quando a profissional troca
+    // de aba pra acompanhar a assinatura.
+    function handleVisibility() {
+      if (document.visibilityState === "visible") checkSigned();
+    }
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    (async () => {
+      const token = crypto.randomUUID();
+      const expiraEm = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+      const { data: updData, error: updErr } = await db
+        .from("fichas_anamnese")
+        .update({ assinatura_token: token, assinatura_token_expira_em: expiraEm, assinatura_tipo: tipo })
+        .eq("id", fichaId)
+        .select("id")
+        .abortSignal(controller.signal);
+      if (controller.signal.aborted) return;
+      // Um update bloqueado pela RLS (ficha de outro usuário) retorna 200 sem erro,
+      // mas com 0 linhas afetadas — sem essa checagem o QR seria gerado para um
+      // token que nunca foi salvo, e a tela pública sempre veria "link inválido".
+      if (updErr || !updData || updData.length === 0) { setError(true); return; }
+
+      const url = `${window.location.origin}/assinar/${token}`;
+      setLink(url);
+      setQrDataUrl(await QRCode.toDataURL(url, { width: 260, margin: 1, color: { dark: "#8C4F4A", light: "#FFFFFF" } }));
+
+      checkSigned();
+      pollId = setInterval(checkSigned, 2000);
+    })();
+
+    return () => {
+      controller.abort();
+      if (pollId) clearInterval(pollId);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [fichaId, tipo]);
+
+  async function handleCopy() {
+    await navigator.clipboard.writeText(link);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <div className="relative w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-2xl">
+        <button onClick={onClose} className="absolute right-3 top-3 rounded-lg p-1.5 text-gray-400 hover:bg-gray-100">
+          <X className="h-5 w-5" />
+        </button>
+
+        {error ? (
+          <p className="py-8 text-sm text-red-500">
+            Não foi possível gerar o link de assinatura. Verifique se você está logada com a conta
+            que cadastrou este prontuário e tente novamente.
+          </p>
+        ) : signed ? (
+          <div className="flex flex-col items-center gap-3 py-4">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
+              <CheckCircle2 className="h-9 w-9 text-emerald-600" />
+            </div>
+            <p className="font-display text-lg font-bold text-[#8C4F4A]">Assinatura concluída!</p>
+            <p className="text-sm text-muted-foreground">O prontuário já foi atualizado com a assinatura de {quemAssina}.</p>
+            <button onClick={onClose} className="mt-2 rounded-lg bg-[#8C4F4A] px-5 py-2 text-sm font-semibold text-white hover:bg-[#74423D]">
+              Fechar
+            </button>
+          </div>
+        ) : (
+          <>
+            <p className="font-display text-lg font-bold text-[#8C4F4A]">
+              Assinatura digital — {tipo === "medica" ? "Médica" : "Paciente"}
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Leia o QR code no celular ou envie o link para {quemAssina} assinar.
+            </p>
+            <div className="mx-auto mt-5 flex h-64 w-64 items-center justify-center rounded-xl border border-[#D0A5A0]/20 bg-white">
+              {qrDataUrl
+                ? <img src={qrDataUrl} alt="QR code de assinatura" className="h-60 w-60" />
+                : <Loader2 className="h-8 w-8 animate-spin text-[#D0A5A0]" />}
+            </div>
+            {link && (
+              <button
+                onClick={handleCopy}
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-[#D0A5A0] px-4 py-2 text-xs font-medium text-[#8C4F4A] hover:bg-[#D0A5A0]/10"
+              >
+                <Copy className="h-3.5 w-3.5" />
+                {copied ? "Link copiado!" : "Copiar link"}
+              </button>
+            )}
+            <p className="mt-4 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+              <Loader2 className="h-3 w-3 animate-spin" /> Aguardando assinatura de {quemAssina}...
+            </p>
+          </>
+        )}
+      </div>
     </div>
   );
 }

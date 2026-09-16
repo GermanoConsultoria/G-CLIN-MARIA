@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AgendarRouteImport } from './routes/agendar'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AssinarTokenRouteImport } from './routes/assinar.$token'
 import { Route as AppSlotsRouteImport } from './routes/_app/slots'
 import { Route as AppServicesRouteImport } from './routes/_app/services'
 import { Route as AppReceivablesRouteImport } from './routes/_app/receivables'
@@ -46,6 +47,11 @@ const AppRoute = AppRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AssinarTokenRoute = AssinarTokenRouteImport.update({
+  id: '/assinar/$token',
+  path: '/assinar/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppSlotsRoute = AppSlotsRouteImport.update({
@@ -141,6 +147,7 @@ export interface FileRoutesByFullPath {
   '/receivables': typeof AppReceivablesRoute
   '/services': typeof AppServicesRoute
   '/slots': typeof AppSlotsRoute
+  '/assinar/$token': typeof AssinarTokenRoute
   '/config/usuarios': typeof AppConfigUsuariosRoute
   '/pacientes/$pacienteId': typeof AppPacientesPacienteIdRoute
 }
@@ -161,6 +168,7 @@ export interface FileRoutesByTo {
   '/receivables': typeof AppReceivablesRoute
   '/services': typeof AppServicesRoute
   '/slots': typeof AppSlotsRoute
+  '/assinar/$token': typeof AssinarTokenRoute
   '/config/usuarios': typeof AppConfigUsuariosRoute
   '/pacientes/$pacienteId': typeof AppPacientesPacienteIdRoute
 }
@@ -183,6 +191,7 @@ export interface FileRoutesById {
   '/_app/receivables': typeof AppReceivablesRoute
   '/_app/services': typeof AppServicesRoute
   '/_app/slots': typeof AppSlotsRoute
+  '/assinar/$token': typeof AssinarTokenRoute
   '/_app/config/usuarios': typeof AppConfigUsuariosRoute
   '/_app/pacientes/$pacienteId': typeof AppPacientesPacienteIdRoute
 }
@@ -205,6 +214,7 @@ export interface FileRouteTypes {
     | '/receivables'
     | '/services'
     | '/slots'
+    | '/assinar/$token'
     | '/config/usuarios'
     | '/pacientes/$pacienteId'
   fileRoutesByTo: FileRoutesByTo
@@ -225,6 +235,7 @@ export interface FileRouteTypes {
     | '/receivables'
     | '/services'
     | '/slots'
+    | '/assinar/$token'
     | '/config/usuarios'
     | '/pacientes/$pacienteId'
   id:
@@ -246,6 +257,7 @@ export interface FileRouteTypes {
     | '/_app/receivables'
     | '/_app/services'
     | '/_app/slots'
+    | '/assinar/$token'
     | '/_app/config/usuarios'
     | '/_app/pacientes/$pacienteId'
   fileRoutesById: FileRoutesById
@@ -255,6 +267,7 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   AgendarRoute: typeof AgendarRoute
   AuthRoute: typeof AuthRoute
+  AssinarTokenRoute: typeof AssinarTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -285,6 +298,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/assinar/$token': {
+      id: '/assinar/$token'
+      path: '/assinar/$token'
+      fullPath: '/assinar/$token'
+      preLoaderRoute: typeof AssinarTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app/slots': {
@@ -448,6 +468,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   AgendarRoute: AgendarRoute,
   AuthRoute: AuthRoute,
+  AssinarTokenRoute: AssinarTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
