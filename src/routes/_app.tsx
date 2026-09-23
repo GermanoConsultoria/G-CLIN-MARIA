@@ -4,7 +4,7 @@ import {
   LogOut, Calendar, Home, Search, Clock, Briefcase,
   TrendingUp, TrendingDown, Scale, BookOpen,
   Users, Menu, X, Tag, FolderHeart, AlertCircle,
-  UserSquare2,
+  UserSquare2, Lock, Wallet,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -61,6 +61,26 @@ function NavItem({
       <item.icon className={`h-6 w-6 shrink-0 ${active ? "text-[#D0A5A0]" : "text-[#8C4F4A]"}`} />
       {!isCollapsed && <span className="whitespace-nowrap">{item.label}</span>}
     </Link>
+  );
+}
+
+function LockedNavItem({ isCollapsed }: { isCollapsed: boolean }) {
+  return (
+    <div
+      title={isCollapsed ? "Financeiro (em breve)" : undefined}
+      aria-disabled="true"
+      className={`flex cursor-not-allowed items-center rounded-lg px-4 py-3 text-sm font-medium text-gray-400 opacity-60 ${
+        isCollapsed ? "justify-center" : "justify-start gap-3"
+      }`}
+    >
+      <Wallet className="h-6 w-6 shrink-0 text-gray-400" />
+      {!isCollapsed && (
+        <span className="flex flex-1 items-center justify-between whitespace-nowrap">
+          Financeiro
+          <Lock className="h-4 w-4 shrink-0 text-gray-400" />
+        </span>
+      )}
+    </div>
   );
 }
 
@@ -204,6 +224,9 @@ function AppLayout() {
               setMobileOpen={setMobileOpen} 
             />
           ))}
+
+          <div className="my-2 border-t border-[#D0A5A0]/20" />
+          <LockedNavItem isCollapsed={isCollapsed} />
 
         </nav>
 

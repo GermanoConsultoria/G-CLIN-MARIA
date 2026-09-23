@@ -8,6 +8,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
+import { WhatsAppButton } from "@/components/whatsapp-button";
 import { AuthProvider } from "@/hooks/use-auth";
 import appCss from "../styles.css?url";
 
@@ -81,6 +82,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <Outlet />
+        <WhatsAppButton />
         <Toaster richColors position="top-right" />
       </AuthProvider>
     </QueryClientProvider>
